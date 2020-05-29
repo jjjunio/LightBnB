@@ -1,13 +1,15 @@
-const properties = require('./json/properties.json');
-const users = require('./json/users.json');
+// const properties = require('./json/properties.json');
+// const users = require('./json/users.json');
 //node-postgres connection
-const { Pool } = require('pg');
-const pool = new Pool({
-  user: 'vagrant',
-  password: '123',
-  host: 'localhost',
-  database: 'lightbnb'
-});
+// const { Pool } = require('pg');
+// const pool = new Pool({
+//   user: 'vagrant',
+//   password: '123',
+//   host: 'localhost',
+//   database: 'lightbnb'
+// });
+
+const db = require('./db');
 
 /// Users
 
@@ -18,7 +20,7 @@ const pool = new Pool({
  */
 
 const getUserWithEmail = function(email) {
-  return pool.query(`
+  return db.query(`
     SELECT * FROM users
     WHERE users.email = $1
   `, [email])
@@ -32,7 +34,7 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function(id) {
-  return pool.query(`
+  return db.query(`
     SELECT * FROM users
     WHERE users.id = $1
   `, [id])
@@ -49,7 +51,7 @@ exports.getUserWithId = getUserWithId;
 
 const addUser =  function(user) {
   const { name, email, password } = user;
-    return pool.query(`
+    return db.query(`
       INSERT INTO users (name, email, password)
       VALUES ($1, $2, $3)
       RETURNING *;
@@ -66,7 +68,7 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  return pool.query(`
+  return db.query(`
     SELECT 
       properties.*,
       reservations.*,
@@ -156,7 +158,7 @@ const getAllProperties = function(options, limit = 10) {
   //check overall query string
   console.log(queryString, queryParams);
 
-  return pool.query(queryString, queryParams)
+  return db.query(queryString, queryParams)
   .then(res => res.rows);
 };
 exports.getAllProperties = getAllProperties;
@@ -185,7 +187,7 @@ const addProperty = function(property) {
     post_code
   } = property;
 
-  return pool.query(`
+  return db.query(`
   INSERT INTO properties 
       (owner_id, 
       title,
